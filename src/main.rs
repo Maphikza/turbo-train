@@ -10,16 +10,20 @@ fn main() {
             .version("0.0.1")
             .about("This is an app for generating safe passwords and storing them in your private database")
             .arg(
-                Arg::new("create")
+                Arg::new("action")
                     .short('c')
-                    .help("for creating new password."))
+                    .long("command")
+                    .value_parser(["new", "list", "del"])
+                    .ignore_case(true)
+                    .help("<new> for new password, <list> for password list, <del> to delete a password."))
             .get_matches();
 
-    if let Some(answer) = matches.get_one::<String>("create") {
-        if answer == "1" {
+
+    if let Some(answer) = matches.get_one::<String>("action") {
+        if answer == "new" {
             new_password_saver();
-        } else {
-            println!("missing argument.")
+        } else if answer == "list" {
+            password_list();
         }
     }
 }
@@ -64,4 +68,20 @@ fn new_password_saver() {
     "
     );
     connection.execute(query).unwrap();
+}
+
+fn password_list() {
+    let query = "SELECT website FROM passwords";
+
+    let connection =
+        sqlite::open("my_keys.db").unwrap();
+
+    connection
+        .iterate(query, |pairs| {
+            for &(website, email) in pairs.iter() {
+                println!("{}, {}", website, email.unwrap())
+            }
+            true
+        })
+        .unwrap()
 }
