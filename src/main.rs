@@ -72,6 +72,7 @@ fn new_password_saver() {
 
 fn password_list() {
     let query = "SELECT website FROM passwords";
+    let mut count = 0;
 
     let connection =
         sqlite::open("my_keys.db").unwrap();
@@ -79,7 +80,8 @@ fn password_list() {
     connection
         .iterate(query, |pairs| {
             for &(website, email) in pairs.iter() {
-                println!("{}, {}", website, email.unwrap())
+                count += 1;
+                println!("{}, {}, {}", count, website, email.unwrap())
             }
             true
         })
