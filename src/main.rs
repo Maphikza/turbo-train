@@ -81,9 +81,27 @@ fn password_list() {
         .iterate(query, |pairs| {
             for &(website, email) in pairs.iter() {
                 count += 1;
-                println!("{}, {}, {}", count, website, email.unwrap())
+                println!("{}, {}, {}", count, website.to_string(), email.unwrap().to_string())
             }
             true
         })
-        .unwrap()
+        .unwrap();
+
+    select_specific();
+}
+
+fn select_specific(){
+    println!("Which website do you need the password for?");
+    let choice = input_capture();
+    let query = format!("SELECT password FROM passwords WHERE website = '{choice}'");
+    let connection = sqlite::open("my_keys.db").unwrap();
+    connection
+        .iterate(query, |pairs| {
+            for &(website, password) in pairs.iter() {
+                println!("{}, {}", website.to_string(), password.unwrap().to_string())
+            }
+            true
+        })
+        .unwrap();
+
 }
