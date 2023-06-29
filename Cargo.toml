@@ -8,4 +8,5 @@ edition = "2021"
 [dependencies]
 clap = "4.3.4"
 rand = "0.8.5"
-sqlite = "0.30.5"
+sqlite = "0.31.0"
+cpython = "0.7.1"

@@ -18,7 +18,6 @@ fn main() {
                     .help("<new> for new password, <list> for password list, <del> to delete a password."))
             .get_matches();
 
-
     if let Some(answer) = matches.get_one::<String>("action") {
         if answer == "new" {
             new_password_saver();
@@ -59,8 +58,7 @@ fn new_password_saver() {
     println!("What is the username or password?");
     let email = input_capture();
     let new_password = password_generator();
-    let connection =
-        sqlite::open("my_keys.db").unwrap();
+    let connection = sqlite::open("my_keys.db").unwrap();
 
     let query = format!(
         "
@@ -74,34 +72,42 @@ fn password_list() {
     let query = "SELECT website FROM passwords";
     let mut count = 0;
 
-    let connection =
-        sqlite::open("my_keys.db").unwrap();
+    let connection = sqlite::open("my_keys.db").unwrap();
 
     connection
         .iterate(query, |pairs| {
             for &(website, email) in pairs.iter() {
                 count += 1;
-                println!("{}, {}, {}", count, website.to_string(), email.unwrap().to_string())
+                println!(
+                    "{}, {}, {}",
+                    count,
+                    website.to_string(),
+                    email.unwrap().to_string()
+                )
             }
             true
         })
         .unwrap();
 
-    select_specific();
+    let outcome = select_specific();
+    password_database::lib::copy_to_clipboard(&outcome);
 }
 
-fn select_specific(){
+fn select_specific() -> String{
     println!("Which website do you need the password for?");
     let choice = input_capture();
+    let mut string_to_copy = String::from("");
     let query = format!("SELECT password FROM passwords WHERE website = '{choice}'");
     let connection = sqlite::open("my_keys.db").unwrap();
     connection
         .iterate(query, |pairs| {
-            for &(website, password) in pairs.iter() {
-                println!("{}, {}", website.to_string(), password.unwrap().to_string())
+            for &(_column, password) in pairs.iter() {
+                println!("The password is: , {}", password.unwrap().to_string());
+                string_to_copy.push_str(password.unwrap());
             }
             true
         })
         .unwrap();
+    string_to_copy
 
 }
